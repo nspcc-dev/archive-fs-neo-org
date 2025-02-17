@@ -134,6 +134,8 @@ const Home = ({
 		} catch (error: any) {
 			if (error.message.indexOf('showSaveFilePicker is not a function') !== -1) {
 				onModal('failed', 'Your current browser does not support this site\'s functionality. For the best experience, please use Chrome 86+ (recommended).', 'about');
+			} else if (error.message.indexOf('The user aborted a request.') !== -1) {
+				onModal('failed', 'Aborted by user.');
 			} else {
 				onModal('failed', error.message || 'Error occurred during block fetching.', (retryIndexTemp: number) => fetchBlocksInRange(+formData.spanStart + retryIndexTemp));
 			}
