@@ -92,6 +92,10 @@ progress::-webkit-progress-value {
     background: transparent !important;
 }
 
+.tag {
+    background: transparent !important;
+}
+
 .notification a:not(.button):not(.dropdown-item) {
     text-decoration: none;
 }
@@ -317,6 +321,11 @@ code {
     .notification code,
     .notification pre {
         background: #343942;
+    }
+
+    .tag {
+        background: transparent !important;
+        color: #adbac7 !important;
     }
 
     .notification.is-primary .subtitle {
