@@ -65,7 +65,7 @@ const Home = ({
 
   const fetchBlocksInRange = async (retryIndex: number | null = null) => {
 		if (formData.spanStart === '' || formData.spanEnd === '' || formData.spanEnd < 0) return onModal('failed', 'Insert correct data');
-		if (formData.spanStart < 0 || formData.spanEnd < 0 || ((formData.spanStart > nets[formData.network].maxBlock || formData.spanEnd > nets[formData.network].maxBlock) && nets[formData.network].maxBlock !== 0)) return onModal('failed', 'Insert correct borders');
+		if (formData.spanStart < 0 || formData.spanEnd < 0 || formData.spanStart > formData.spanEnd || ((formData.spanStart > nets[formData.network].maxBlock || formData.spanEnd > nets[formData.network].maxBlock) && nets[formData.network].maxBlock !== 0)) return onModal('failed', 'Insert correct borders');
 
 
 		if (retryIndex === null) {
