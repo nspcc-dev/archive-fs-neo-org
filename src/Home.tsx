@@ -59,7 +59,7 @@ const Home = ({
 				onModal('failed', 'Failed to fetch the last available block');
 			});
 		} else {
-			if (formData.spanEnd > nets[formData.network].maxBlock) return setFormData({ ...formData, spanEnd: nets[formData.network].maxBlock });
+			setFormData({ ...formData, spanEnd: nets[formData.network].maxBlock });
 		}
   },[formData.network]); // eslint-disable-line react-hooks/exhaustive-deps
 
