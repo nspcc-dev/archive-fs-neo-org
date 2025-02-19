@@ -41,12 +41,12 @@ export const App = () => {
 	const [nets, setNets] = useState<NetItem[]>([{
 		title: 'Mainnet',
 		containerId: '3RCdP3ZubyKyo8qFeo7EJPryidTZaGCMdUjqFJaaEKBV',
-		rpc: 'https://rpc10.n3.nspcc.ru:10331',
+		rpc: 'https://rpc10.n3.nspcc.ru',
 		maxBlock: 0,
 	}, {
 		title: 'Testnet',
 		containerId: 'A8nGtDemWrm2SjfcGAG6wvrxmXwqc5fwr8ezNDm6FraT',
-		rpc: 'https://rpc.t5.n3.nspcc.ru:20331',
+		rpc: 'https://rpc.t5.n3.nspcc.ru',
 		maxBlock: 0,
 	}, {
 		title: 'NeoFS Mainnet',
@@ -56,7 +56,7 @@ export const App = () => {
 	}, {
 		title: 'NeoFS Testnet',
 		containerId: '98xz5YeanzxRCpH6EfUhECVm2MynGYchDN4naJViHT9M',
-		rpc: 'https://rpc1.morph.t5.fs.neo.org',
+		rpc: 'https://rpc.t5.fs.neo.org',
 		maxBlock: 0,
 	}]);
 	const [currentDownloadedBlock, setCurrentDownloadedBlock] = useState(0);
