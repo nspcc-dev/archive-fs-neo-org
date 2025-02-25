@@ -133,7 +133,7 @@ export const App = () => {
 					<div className="modal_content">
 						<Heading weight="semibold" subtitle style={{ textAlign: 'center', marginBottom: 5 }}>{`Snapshot`}</Heading>
 						<Heading weight="semibold" size={6} subtitle style={{ textAlign: 'center' }}>{`${modal.params.spanStart} - ${modal.params.spanEnd} (${nets[modal.params.network].title})`}</Heading>
-						<Heading size={6} subtitle style={{ textAlign: 'center', margin: 0 }}>{currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1) === 1 ? 'Success!' : 'Writing'}</Heading>
+						<Heading size={6} subtitle style={{ textAlign: 'center', margin: 0 }}>{currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1) === 1 ? 'Success!' : 'Downloading'}</Heading>
 						<Progress
 							max={100}
 							value={roundNumber((currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1)) * 100)}
