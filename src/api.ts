@@ -5,7 +5,13 @@ type Methods = "GET" | "POST";
 async function serverRequest(method: Methods, url: string, params: object, headers: any) {
 	const json: any = {
 		method,
-		headers,
+		cache: 'no-store',
+		headers: {
+			'Cache-Control': 'no-cache, no-store, must-revalidate',
+			'Pragma': 'no-cache',
+			'Expires': '0',
+			...headers,
+		},
 	}
 
 	if (json['headers']['Content-Type']) {
