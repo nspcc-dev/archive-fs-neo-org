@@ -31,6 +31,7 @@ const Home = ({
 	nets,
 	setNets,
 	setCurrentDownloadedBlock,
+	setAbortController,
 	isLoading,
 	setLoading,
 }) => {
@@ -80,7 +81,14 @@ const Home = ({
 					types: [{ accept: { 'application/octet-stream': ['.acc'] } }],
 				});
 			}
-			onModal('loading', formData);
+			onModal('loading', formData, (retryIndexTemp: number) => fetchBlocksInRange(+formData.spanStart + retryIndexTemp));
+
+			const controllerStop = new AbortController();
+			const controllerPause = new AbortController();
+   	 	setAbortController({
+				controllerStop,
+				controllerPause,
+			});
 
 			const writableStream = await fileHandle?.createWritable(retryIndex === null ? {} : { keepExistingData: true });
 
@@ -95,6 +103,8 @@ const Home = ({
 			const indexFileStart = Math.floor(formData.spanStart / 128000);
 			const indexFileCount = Math.ceil((formData.spanEnd - formData.spanStart) / 128000) + indexFileStart;
 			for (let indexFile = indexFileStart; indexFile <= indexFileCount; indexFile += 1) {
+				if (controllerStop.signal.aborted) throw new Error('Fetching aborted');
+				if (controllerPause.signal.aborted) throw new Error('Paused');
 
 				const indexData: Uint8Array | string = await fetchIndexFile(currentNet, indexFile);
 				if (typeof indexData === 'string') {
@@ -113,6 +123,9 @@ const Home = ({
 
 				const startBlock = retryIndex !== null ? retryIndex : formData.spanStart;
 				for (let i = startBlock - (128000 * indexFile); i <= objectsData.length; i += 1) {
+					if (controllerStop.signal.aborted) throw new Error('Fetching aborted');
+					if (controllerPause.signal.aborted) throw new Error('Paused');
+
 					if (blockCount <= (indexFile * 128000 + i - formData.spanStart)) {
 						await writableStream?.close();
 						return
@@ -132,11 +145,14 @@ const Home = ({
 				}
 			}
 		} catch (error: any) {
-			if (error.message.indexOf('showSaveFilePicker is not a function') !== -1) {
+			if (error.message.indexOf('Fetching aborted') !== -1) {
+				onModal('failed', 'Fetching was cancelled');
+				setAbortController(null);
+			} else if (error.message.indexOf('showSaveFilePicker is not a function') !== -1) {
 				onModal('failed', 'Your current browser does not support this site\'s functionality. For the best experience, please use Chrome 86+ (recommended).', 'about');
 			} else if (error.message.indexOf('The user aborted a request.') !== -1) {
 				onModal('failed', 'Aborted by user.');
-			} else {
+			} else if (error.message.indexOf('Paused') === -1) {
 				onModal('failed', error.message || 'Error occurred during block fetching.', (retryIndexTemp: number) => fetchBlocksInRange(+formData.spanStart + retryIndexTemp));
 			}
 		} finally {
