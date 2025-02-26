@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Route, Routes } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
 	Navbar,
@@ -60,6 +61,8 @@ export const App = () => {
 		maxBlock: 0,
 	}]);
 	const [currentDownloadedBlock, setCurrentDownloadedBlock] = useState(0);
+	const [abortController, setAbortController] = useState<{ controllerStop: AbortController, controllerPause: AbortController } | null>(null);
+	const [pausedStatus, setPausedStatus] = useState<string>('');
 	const [menuActive, setMenuActive] = useState<boolean>(false);
 	const [isLoading, setLoading] = useState<boolean>(false);
 	const [modal, setModal] = useState<Modal>({
@@ -83,12 +86,18 @@ export const App = () => {
 				<div className="modal">
 					<div
 						className="modal_close_panel"
-						onClick={() => onModal()}
+						onClick={() => {
+							onModal();
+							setCurrentDownloadedBlock(0);
+						}}
 					/>
 					<div className="modal_content">
 						<div
 							className="modal_close"
-							onClick={() => onModal()}
+							onClick={() => {
+								onModal();
+								setCurrentDownloadedBlock(0);
+							}}
 						>
 							<img
 								src="/img/close.svg"
@@ -126,19 +135,60 @@ export const App = () => {
 					<div
 						className="modal_close_panel"
 						onClick={currentDownloadedBlock < (modal.params.spanEnd - modal.params.spanStart + 1) ? () => {} : () => {
-							onModal();
+							abortController?.controllerStop.abort();
 							setCurrentDownloadedBlock(0);
 						}}
 					/>
 					<div className="modal_content">
 						<Heading weight="semibold" subtitle style={{ textAlign: 'center', marginBottom: 5 }}>{`Snapshot`}</Heading>
 						<Heading weight="semibold" size={6} subtitle style={{ textAlign: 'center' }}>{`${modal.params.spanStart} - ${modal.params.spanEnd} (${nets[modal.params.network].title})`}</Heading>
-						<Heading size={6} subtitle style={{ textAlign: 'center', margin: 0 }}>{currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1) === 1 ? 'Success!' : 'Writing'}</Heading>
+						<Heading size={6} subtitle style={{ textAlign: 'center', margin: 0 }}>{currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1) === 1 ? 'Success!' : 'Downloading'}</Heading>
 						<Progress
 							max={100}
 							value={roundNumber((currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1)) * 100)}
 						/>
 						<Heading size={6} subtitle style={{ textAlign: 'center', margin: 0 }}>{`${currentDownloadedBlock} / ${modal.params.spanEnd - modal.params.spanStart + 1} (${roundNumber((currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1)) * 100)}%)`}</Heading>
+						<Button
+							color="primary"
+							onClick={() => {
+								if (pausedStatus === 'continue') {
+									typeof modal.btn === 'function' && modal.btn(currentDownloadedBlock);
+									setPausedStatus('paused');
+									setTimeout(() => setPausedStatus(''), 500);
+								} else {
+									abortController?.controllerPause.abort();
+									setPausedStatus('paused');
+									setTimeout(() => setPausedStatus('continue'), 500);
+								}
+							}}
+							style={{ minWidth: 300, marginTop: 25 }}
+						>
+							<span>
+								{pausedStatus === 'paused' ? (
+									<FontAwesomeIcon
+										icon={['fas', 'spinner']}
+										spin
+									/>
+								) : pausedStatus === '' ? 'Pause': 'Continue'}
+							</span>
+						</Button>
+						<Button
+							color="secondary"
+							onClick={() => {
+								abortController?.controllerStop.abort();
+								setCurrentDownloadedBlock(0);
+							}}
+							style={{ minWidth: 300, marginTop: 10 }}
+						>
+							<span>
+								{abortController?.controllerStop.signal.aborted ? (
+									<FontAwesomeIcon
+										icon={['fas', 'spinner']}
+										spin
+									/>
+								) : 'Cancel'}
+							</span>
+						</Button>
 					</div>
 				</div>
 			)}
@@ -185,6 +235,7 @@ export const App = () => {
 							nets={nets}
 							setNets={setNets}
 							setCurrentDownloadedBlock={setCurrentDownloadedBlock}
+							setAbortController={setAbortController}
 							isLoading={isLoading}
 							setLoading={setLoading}
 						/>}
