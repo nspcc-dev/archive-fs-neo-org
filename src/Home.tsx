@@ -118,7 +118,7 @@ const Home = ({
 						return
 					}
 
-					const objectData: Uint8Array | string = await fetchBlock(currentNet, objectsData[i]);
+					const objectData: Uint8Array | string = await fetchBlock(currentNet, i, objectsData[i]);
 					if (typeof objectData === 'string') {
 						await writableStream?.close();
 						onModal('failed', objectData, (currentDownloadedBlockTemp: number) => fetchBlocksInRange(+formData.spanStart + currentDownloadedBlockTemp));
@@ -166,12 +166,12 @@ const Home = ({
 		}
 	};
 
-	const fetchBlock = async (currentNet: NetItem, objectId: string): Promise<Uint8Array | string> => {
+	const fetchBlock = async (currentNet: NetItem, objectNumber: number, objectId: string): Promise<Uint8Array | string> => {
 		try {
 			const blockResponse = await api('GET', `/objects/${currentNet.containerId}/by_id/${objectId}?walletConnect=false`);
 			return blockResponse as Uint8Array;
 		} catch (err: any) {
-			return `Error occurred during object fetching ${objectId}: ${err.message}`;
+			return `Error occurred during object fetching #${objectNumber}: ${err.message}`;
 		}
 	};
 
