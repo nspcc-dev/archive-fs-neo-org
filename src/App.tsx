@@ -177,6 +177,9 @@ export const App = () => {
 							onClick={() => {
 								abortController?.controllerStop.abort();
 								setCurrentDownloadedBlock(0);
+								if (pausedStatus === 'continue') {
+									onModal('failed', 'Fetching was cancelled');
+								}
 							}}
 							style={{ minWidth: 300, marginTop: 10 }}
 						>
