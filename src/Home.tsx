@@ -204,7 +204,7 @@ const Home = ({
 						>
 							<Heading weight="semibold" subtitle style={{ textAlign: 'center' }}>Archive.NeoFS – Offline Synchronization Package</Heading>
 							<Content>
-								<p>Easily download an offline package of blocks up to a specific block height.</p>
+								<p>Easily download a NEP-32 chain dump of blocks up to a specific block height.</p>
 								<p>Manual steps:</p>
 								<ul>
 									<li>Choose <code>start</code> and <code>end</code> snapshot option for the data range;</li>
