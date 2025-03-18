@@ -122,7 +122,8 @@ const Home = ({
 				}
 
 				const startBlock = retryIndex !== null ? retryIndex : formData.spanStart;
-				for (let i = startBlock - (128000 * indexFile); i <= objectsData.length; i += 1) {
+				const startIndex = startBlock > (128000 * indexFile) ? startBlock - (128000 * indexFile) : 0;
+				for (let i = startIndex; i < objectsData.length; i += 1) {
 					if (controllerStop.signal.aborted) throw new Error('Fetching aborted');
 					if (controllerPause.signal.aborted) throw new Error('Paused');
 
