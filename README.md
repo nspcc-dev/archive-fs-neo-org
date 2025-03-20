@@ -17,7 +17,7 @@ Archive.NeoFS – Offline Synchronization Package. Download an offline block dum
 
 - docker
 - make
-- node (`14+`)
+- node (`18+`)
 
 # Make instructions
 
