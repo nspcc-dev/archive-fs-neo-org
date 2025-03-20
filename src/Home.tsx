@@ -12,8 +12,7 @@ import {
 	Button,
 } from 'react-bulma-components';
 import api from './api.ts';
-
-const base58 = require('base-58');
+import base58 from 'base-58';
 
 interface NetItem {
 	title: string
@@ -228,6 +227,7 @@ const Home = ({
 							<Form.Field className="inputs_block">
 								<Form.Control>
 									<Form.Input
+										renderAs="input"
 										placeholder="Start position"
 										type="text"
 										value={formData.spanStart}
@@ -241,6 +241,7 @@ const Home = ({
 								</Form.Control>
 								<Form.Control>
 									<Form.Input
+										renderAs="input"
 										placeholder="End position"
 										type="text"
 										value={formData.spanEnd}
@@ -256,6 +257,7 @@ const Home = ({
 							<Form.Field className="select_block">
 								<Form.Control>
 									<Form.Select
+										renderAs="select"
 										onChange={(e: any) => setFormData({ ...formData, network: Number(e.target.value) })}
 										value={formData.network}
 										disabled={isLoading}

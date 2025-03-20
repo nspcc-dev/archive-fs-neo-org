@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import React, { useState } from 'react';
 import { Link, Route, Routes } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -144,6 +145,7 @@ export const App = () => {
 						<Heading weight="semibold" size={6} subtitle style={{ textAlign: 'center' }}>{`${modal.params.spanStart} - ${modal.params.spanEnd} (${nets[modal.params.network].title})`}</Heading>
 						<Heading size={6} subtitle style={{ textAlign: 'center', margin: 0 }}>{currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1) === 1 ? 'Success!' : 'Downloading'}</Heading>
 						<Progress
+							renderAs="progress"
 							max={100}
 							value={roundNumber((currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1)) * 100)}
 						/>
@@ -211,7 +213,7 @@ export const App = () => {
 				<Navbar.Menu
 					className={menuActive ? 'is-active' : ''}
 				>
-					<Navbar.Container>
+					<Navbar.Container className="navbar-start">
 						<Link
 							to="/"
 							className="navbar-item"
@@ -321,7 +323,7 @@ export const App = () => {
 					subtitle
 					style={{ textAlign: 'center', fontSize: '.75rem' }}
 				>
-					{process.env.REACT_APP_VERSION}
+					{import.meta.env.REACT_APP_VERSION}
 				</Heading>
 			</Footer>
     </>
