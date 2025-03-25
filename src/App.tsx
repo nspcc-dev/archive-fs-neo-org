@@ -150,50 +150,65 @@ export const App = () => {
 							value={roundNumber((currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1)) * 100)}
 						/>
 						<Heading size={6} subtitle style={{ textAlign: 'center', margin: 0 }}>{`${currentDownloadedBlock} / ${modal.params.spanEnd - modal.params.spanStart + 1} (${roundNumber((currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1)) * 100)}%)`}</Heading>
-						<Button
-							color="primary"
-							onClick={() => {
-								if (pausedStatus === 'continue') {
-									typeof modal.btn === 'function' && modal.btn(currentDownloadedBlock);
-									setPausedStatus('paused');
-									setTimeout(() => setPausedStatus(''), 500);
-								} else {
-									abortController?.controllerPause.abort();
-									setPausedStatus('paused');
-									setTimeout(() => setPausedStatus('continue'), 500);
-								}
-							}}
-							style={{ minWidth: 300, marginTop: 25 }}
-						>
-							<span>
-								{pausedStatus === 'paused' ? (
-									<FontAwesomeIcon
-										icon={['fas', 'spinner']}
-										spin
-									/>
-								) : pausedStatus === '' ? 'Pause': 'Continue'}
-							</span>
-						</Button>
-						<Button
-							color="secondary"
-							onClick={() => {
-								abortController?.controllerStop.abort();
-								setCurrentDownloadedBlock(0);
-								if (pausedStatus === 'continue') {
-									onModal('failed', 'Fetching was cancelled');
-								}
-							}}
-							style={{ minWidth: 300, marginTop: 10 }}
-						>
-							<span>
-								{abortController?.controllerStop.signal.aborted ? (
-									<FontAwesomeIcon
-										icon={['fas', 'spinner']}
-										spin
-									/>
-								) : 'Cancel'}
-							</span>
-						</Button>
+						{currentDownloadedBlock / (modal.params.spanEnd - modal.params.spanStart + 1) === 1 ? (
+							<Button
+								color="primary"
+								onClick={() => {
+									onModal();
+									setCurrentDownloadedBlock(0);
+								}}
+								style={{ minWidth: 300, marginTop: 25 }}
+							>
+								Great
+							</Button>
+						) : (
+							<>
+								<Button
+									color="primary"
+									onClick={() => {
+										if (pausedStatus === 'continue') {
+											typeof modal.btn === 'function' && modal.btn(currentDownloadedBlock);
+											setPausedStatus('paused');
+											setTimeout(() => setPausedStatus(''), 500);
+										} else {
+											abortController?.controllerPause.abort();
+											setPausedStatus('paused');
+											setTimeout(() => setPausedStatus('continue'), 500);
+										}
+									}}
+									style={{ minWidth: 300, marginTop: 25 }}
+								>
+									<span>
+										{pausedStatus === 'paused' ? (
+											<FontAwesomeIcon
+												icon={['fas', 'spinner']}
+												spin
+											/>
+										) : pausedStatus === '' ? 'Pause': 'Continue'}
+									</span>
+								</Button>
+								<Button
+									color="secondary"
+									onClick={() => {
+										abortController?.controllerStop.abort();
+										setCurrentDownloadedBlock(0);
+										if (pausedStatus === 'continue') {
+											onModal('failed', 'Fetching was cancelled');
+										}
+									}}
+									style={{ minWidth: 300, marginTop: 10 }}
+								>
+									<span>
+										{abortController?.controllerStop.signal.aborted ? (
+											<FontAwesomeIcon
+												icon={['fas', 'spinner']}
+												spin
+											/>
+										) : 'Cancel'}
+									</span>
+								</Button>
+							</>
+						)}
 					</div>
 				</div>
 			)}
