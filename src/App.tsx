@@ -136,7 +136,7 @@ export const App = () => {
 					<div
 						className="modal_close_panel"
 						onClick={currentDownloadedBlock < (modal.params.spanEnd - modal.params.spanStart + 1) ? () => {} : () => {
-							abortController?.controllerStop.abort();
+							onModal();
 							setCurrentDownloadedBlock(0);
 						}}
 					/>
