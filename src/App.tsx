@@ -194,6 +194,7 @@ export const App = () => {
 										setCurrentDownloadedBlock(0);
 										if (pausedStatus === 'continue') {
 											onModal('failed', 'Fetching was cancelled');
+											setPausedStatus('');
 										}
 									}}
 									style={{ minWidth: 300, marginTop: 10 }}
