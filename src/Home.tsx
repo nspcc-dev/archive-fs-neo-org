@@ -43,7 +43,8 @@ const Home = ({
 	let fileHandle: FileSystemFileHandle | null = null;
 
   useEffect(() => {
-		if (nets[formData.network].maxBlock === 0) {
+		const currentMaxBlock = nets[formData.network].maxBlock;
+		if (currentMaxBlock === 0) {
 			api('POST', nets[formData.network].rpc, {
 				"jsonrpc": "2.0",
 				"id": 1,
@@ -54,12 +55,18 @@ const Home = ({
 				netsTemp[formData.network].maxBlock = Math.floor(res.result / 128000) * 128000;
 				setNets(netsTemp);
 
-				setFormData({ ...formData, spanEnd: nets[formData.network].maxBlock });
+				setFormData((prevFormData) => {
+					if (prevFormData.spanEnd === '' || nets.map((item) => item.maxBlock).indexOf(prevFormData.spanEnd) !== -1) {
+						return ({ ...formData, spanEnd: nets[formData.network].maxBlock });
+					} else {
+						return prevFormData;
+					}
+				});
 			}).catch(() => {
 				onModal('failed', 'Failed to fetch the last available block');
 			});
 		} else {
-			setFormData({ ...formData, spanEnd: nets[formData.network].maxBlock });
+			if (formData.spanEnd === '' || nets.map((item) => item.maxBlock).indexOf(formData.spanEnd) !== -1) return setFormData({ ...formData, spanEnd: currentMaxBlock });
 		}
   },[formData.network]); // eslint-disable-line react-hooks/exhaustive-deps
 
