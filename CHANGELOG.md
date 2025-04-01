@@ -4,6 +4,18 @@ Changelog for NeoFS Archive
 
 ## [Unreleased]
 
+## [0.0.4] - 2025-04-01
+
+### Updated
+
+- Migrate to vite (#24)
+
+### Fixed
+
+- Reset pause state after canceling downloading (#20)
+- Add modal closing for click outside in case of ending downloading (#22)
+- Do not change value in end block if it is entered by user (#23)
+
 ## [0.0.3] - 2025-03-18
 
 ### Fixed
@@ -30,4 +42,5 @@ First public release.
 [0.0.1]: https://github.com/nspcc-dev/archive-fs-neo-org/tree/v0.0.1
 [0.0.2]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.1...v0.0.2
 [0.0.3]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.2...v0.0.3
-[Unreleased]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.3...master
+[0.0.4]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.3...v0.0.4
+[Unreleased]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.4...master
