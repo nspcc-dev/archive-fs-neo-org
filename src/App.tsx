@@ -339,7 +339,7 @@ export const App = () => {
 					subtitle
 					style={{ textAlign: 'center', fontSize: '.75rem' }}
 				>
-					{import.meta.env.REACT_APP_VERSION}
+					{import.meta.env.VITE_VERSION}
 				</Heading>
 			</Footer>
     </>
