@@ -53,7 +53,7 @@ export const App = () => {
 	}, {
 		title: 'NeoFS Mainnet',
 		containerId: 'BP71MqY7nJhpuHfdQU3infRSjMgVmSFFt9GfG2GGMZJj',
-		rpc: 'https://rpc.morph.fs.neo.org',
+		rpc: 'https://rpc.fs.neo.org',
 		maxBlock: 0,
 	}, {
 		title: 'NeoFS Testnet',
