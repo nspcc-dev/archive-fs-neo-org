@@ -25,6 +25,16 @@ interface FormData {
 	network: number
 }
 
+interface QueuedBlock {
+	blockNumber: number;
+	oid: string
+}
+
+interface BlockWithAttrs {
+	objectId: string;
+	attributes: Record<string, any>;
+}
+
 const Home = ({
 	onModal,
 	nets,
@@ -70,6 +80,8 @@ const Home = ({
 		}
   },[formData.network]); // eslint-disable-line react-hooks/exhaustive-deps
 
+	const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+
   const fetchBlocksInRange = async (retryIndex: number | null = null) => {
 		if (formData.spanStart === '' || formData.spanEnd === '' || formData.spanEnd < 0) return onModal('failed', 'Insert correct data');
 		if (formData.spanStart < 0 || formData.spanEnd < 0 || formData.spanStart > formData.spanEnd || ((formData.spanStart > nets[formData.network].maxBlock || formData.spanEnd > nets[formData.network].maxBlock) && nets[formData.network].maxBlock !== 0)) return onModal('failed', 'Insert correct borders');
@@ -102,55 +114,78 @@ const Home = ({
 			if (retryIndex === null) {
 				await writableStream?.write(new Int32Array([blockCount]).buffer);
 			} else {
-				const offset: any = (await fileHandle?.getFile())?.size;
-				writableStream?.seek(offset)
+				const offset: number = (await fileHandle?.getFile())?.size ?? 0;
+				await writableStream?.seek(offset);
 			}
 
-			const indexFileStart = Math.floor(formData.spanStart / 128000);
-			const indexFileCount = Math.ceil((formData.spanEnd - formData.spanStart) / 128000) + indexFileStart;
-			for (let indexFile = indexFileStart; indexFile <= indexFileCount; indexFile += 1) {
+			const queue: QueuedBlock[] = [];
+			const startBlock: any = retryIndex !== null ? retryIndex : formData.spanStart;
+			let lastBlockIndex: number | null = null;
+			let writtenCount: number = retryIndex !== null ? retryIndex : 0;
+			let isRefilling = false;
+
+			const refillQueue = async (nextBlock: number = startBlock) => {
+				if (controllerStop.signal.aborted) return;
+				if (isRefilling || nextBlock > +formData.spanEnd) return;
+				isRefilling = true;
+
+				const remaining = +formData.spanEnd - nextBlock + 1;
+				const limit = Math.min(1000, remaining);
+				try {
+					const objectsData: BlockWithAttrs[] | string = await fetchBatchBlocks(currentNet, nextBlock, limit);
+					if (typeof objectsData === 'string') {
+						controllerStop.abort();
+						await writableStream?.close();
+						onModal('failed', objectsData, (retryIndexTemp: number) => fetchBlocksInRange(nextBlock + retryIndexTemp));
+						return
+					}
+
+					objectsData.forEach((block) => queue.push({ blockNumber: Number(block.attributes.Block), oid: block.objectId }));
+				} finally {
+					isRefilling = false;
+				}
+			};
+
+			await refillQueue();
+
+			while (!controllerStop.signal.aborted && writtenCount < blockCount) {
+				if (queue.length < 500) {
+					refillQueue(queue[queue.length - 1].blockNumber + 1);
+				}
+
+				if (queue.length === 0) {
+					await delay(50);
+					continue;
+				}
+
+				const { blockNumber, oid } = queue.shift()!;
+
 				if (controllerStop.signal.aborted) throw new Error('Fetching aborted');
 				if (controllerPause.signal.aborted) throw new Error('Paused');
 
-				const indexData: Uint8Array | string = await fetchIndexFile(currentNet, indexFile);
-				if (typeof indexData === 'string') {
+				if (blockNumber === lastBlockIndex) {
+					continue;
+				}
+				lastBlockIndex = blockNumber;
+
+				const objectData: Uint8Array | string = await fetchBlock(currentNet, blockNumber, oid);
+				if (typeof objectData === 'string') {
+					controllerStop.abort();
 					await writableStream?.close();
-					onModal('failed', indexData, (retryIndexTemp: number) => fetchBlocksInRange(+formData.spanStart + retryIndexTemp));
+					onModal('failed', objectData, (currentDownloadedBlockTemp: number) => fetchBlocksInRange(+formData.spanStart + currentDownloadedBlockTemp));
 					return
 				}
 
-				const uint8Data = new Uint8Array(indexData);
-				const objectsData: string[] = [];
-				for (let i = 0; i < uint8Data.length; i += 32) {
-					const chunk = uint8Data.slice(i, i + 32);
-					const encoded = base58.encode(chunk);
-					objectsData.push(encoded);
-				}
+				const blockSize = new Uint32Array([objectData.byteLength]).buffer;
+				await writableStream?.write(blockSize);
+				await writableStream?.write(objectData);
 
-				const startBlock = retryIndex !== null ? retryIndex : formData.spanStart;
-				const startIndex = startBlock > (128000 * indexFile) ? startBlock - (128000 * indexFile) : 0;
-				for (let i = startIndex; i < objectsData.length; i += 1) {
-					if (controllerStop.signal.aborted) throw new Error('Fetching aborted');
-					if (controllerPause.signal.aborted) throw new Error('Paused');
-
-					if (blockCount <= (indexFile * 128000 + i - formData.spanStart)) {
-						await writableStream?.close();
-						return
-					}
-
-					const objectData: Uint8Array | string = await fetchBlock(currentNet, i, objectsData[i]);
-					if (typeof objectData === 'string') {
-						await writableStream?.close();
-						onModal('failed', objectData, (currentDownloadedBlockTemp: number) => fetchBlocksInRange(+formData.spanStart + currentDownloadedBlockTemp));
-						return
-					}
-
-					const blockSize = new Uint32Array([objectData.byteLength]);
-					await writableStream?.write(blockSize.buffer);
-					await writableStream?.write(new Uint8Array(objectData));
-					setCurrentDownloadedBlock((indexFile * 128000 + i) - formData.spanStart + 1);
-				}
+				writtenCount += 1;
+				setCurrentDownloadedBlock(writtenCount);
 			}
+
+			await writableStream?.close();
+
 		} catch (error: any) {
 			if (error.message.indexOf('Fetching aborted') !== -1) {
 				onModal('failed', 'Fetching was cancelled');
@@ -167,31 +202,32 @@ const Home = ({
 		}
   };
 
-	const fetchIndexFile = async (currentNet: NetItem, indexNumber: number): Promise<Uint8Array | string> => {
+	const fetchBatchBlocks = async (currentNet: NetItem, batchStart: number, limit: number = 1000): Promise<BlockWithAttrs[] | string> => {
 		try {
-			const searchResponse: any = await api('POST', `/objects/${currentNet.containerId}/search?walletConnect=false&offset=0&limit=1`, {
+			const searchResponse: any = await api('POST', `/v2/objects/${currentNet.containerId}/search?limit=${limit}`, {
+				attributes: [
+					'Block',
+				],
 				filters: [{
-					"key": "Index",
-					"match": "MatchStringEqual",
-					"value": indexNumber.toString(),
+					"key": "Block",
+					"match": "MatchNumGE",
+					"value": batchStart.toString(),
 				}],
 			});
 
-			const objectId = searchResponse.objects[0]?.address.objectId;
-			if (!objectId) {
-				return `Error occurred during index fetching #${indexNumber}`;
+			if (searchResponse.objects.length === 0) {
+				return `Error occurred during fetching objects #${batchStart}`;
 			}
 
-			const indexResponse = await api('GET', `/objects/${currentNet.containerId}/by_id/${objectId}?walletConnect=false`);
-			return indexResponse as Uint8Array;
+			return searchResponse.objects as BlockWithAttrs[];
 		} catch (err: any) {
-			return `Error occurred during index fetching #${indexNumber}: ${err.message}`;
+			return `Error occurred during fetching objects #${batchStart}: ${err.message}`;
 		}
 	};
 
 	const fetchBlock = async (currentNet: NetItem, objectNumber: number, objectId: string): Promise<Uint8Array | string> => {
 		try {
-			const blockResponse = await api('GET', `/objects/${currentNet.containerId}/by_id/${objectId}?walletConnect=false`);
+			const blockResponse = await api('GET', `/v1/objects/${currentNet.containerId}/by_id/${objectId}`);
 			return blockResponse as Uint8Array;
 		} catch (err: any) {
 			return `Error occurred during object fetching #${objectNumber}: ${err.message}`;
