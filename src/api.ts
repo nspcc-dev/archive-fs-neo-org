@@ -1,4 +1,4 @@
-const server = 'https://rest.fs.neo.org/v1';
+const server = 'https://rest.fs.neo.org';
 
 type Methods = "GET" | "POST";
 
