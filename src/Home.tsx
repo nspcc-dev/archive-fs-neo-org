@@ -248,7 +248,7 @@ const Home = ({
 							<Content>
 							<p>Temporarily unavailable. To be restored once NeoGo is upgraded to <a href="https://github.com/nspcc-dev/neo-go/issues/3925">the new block storage scheme</a></p>
 							</Content>
-/*
+{/*
 							<Content>
 								<p>Easily download a NEP-32 chain dump of blocks up to a specific block height.</p>
 								<p>Manual steps:</p>
@@ -260,11 +260,11 @@ const Home = ({
 								</ul>
 								<p>For the best experience, please use Chrome 86+.</p>
 							</Content>
-*/
+*/}
 						</Tile>
 					</Tile>
 				</Tile>
-/*
+{/*
 				<Tile kind="ancestor">
 					<Tile kind="parent">
 						<Tile
@@ -338,7 +338,7 @@ const Home = ({
 						</Tile>
 					</Tile>
 				</Tile>
-*/
+*/}
 			</Section>
 		</Container>
   );
