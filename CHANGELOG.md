@@ -4,6 +4,11 @@ Changelog for NeoFS Archive
 
 ## [Unreleased]
 
+## [0.0.6] - 2026-11-11
+
+### Changed
+- Temporary stub (#40)
+
 ## [0.0.5] - 2025-05-29
 
 ### Changed
@@ -54,4 +59,5 @@ First public release.
 [0.0.3]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.2...v0.0.3
 [0.0.4]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.3...v0.0.4
 [0.0.5]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.4...v0.0.5
-[Unreleased]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.5...master
+[0.0.6]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.5...v0.0.6
+[Unreleased]: https://github.com/nspcc-dev/archive-fs-neo-org/compare/v0.0.6...master
